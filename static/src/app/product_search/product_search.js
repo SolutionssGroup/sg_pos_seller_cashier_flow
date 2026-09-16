@@ -1,18 +1,9 @@
-﻿/** @odoo-module **/
+/** @odoo-module **/
 
 import { patch } from "@web/core/utils/patch";
 import { useEffect } from "@odoo/owl";
 import { ProductsWidget } from "@point_of_sale/app/screens/product_screen/product_list/product_list";
 
-// El core de Odoo ya trae una busqueda server-side por name/default_code/barcode
-// (ver ProductsWidget.loadProductFromDB), pero solo se dispara al presionar Enter.
-// Mientras el usuario escribe, el POS solo filtra sobre el indice local (productos
-// ya cacheados en el navegador) usando un algoritmo simple que no siempre coincide
-// con lo que el servidor si encuentra (ej. frases de varias palabras en distinto
-// orden al nombre real del producto, como "tornillo g8 5/8 x 3" contra
-// "TORNILLO HEX 5/8 X 3 G8"). Este patch dispara la busqueda server-side
-// automaticamente (con debounce) y muestra directamente los productos que el
-// servidor encontro, sin depender de que el filtro local los reconozca.
 const SG_SEARCH_DEBOUNCE_MS = 400;
 
 patch(ProductsWidget.prototype, {
