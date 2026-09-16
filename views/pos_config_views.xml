@@ -9,6 +9,9 @@
                 <setting string="Flujo Vendedores / Caja" help="Define si este Punto de Venta funciona como vendedor o como caja.">
                     <field name="sg_pos_flow_role"/>
                 </setting>
+                <setting string="Cliente predeterminado" help="Cliente que se asigna automaticamente a cada pedido nuevo al abrir sesion en este Punto de Venta.">
+                    <field name="sg_default_partner_id"/>
+                </setting>
             </xpath>
         </field>
     </record>

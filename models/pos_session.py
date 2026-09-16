@@ -67,6 +67,20 @@ class PosSession(models.Model):
     def _get_pos_ui_pos_config(self, params):
         config = super()._get_pos_ui_pos_config(params)
         config["sg_pos_flow_role"] = self.config_id.sg_pos_flow_role
+        config["sg_default_partner_id"] = self.config_id.sg_default_partner_id.id or False
         if self.config_id.sg_pos_flow_role == "seller":
             config["cash_control"] = False
         return config
+
+    def _get_pos_ui_res_partner(self, params):
+        partners = super()._get_pos_ui_res_partner(params)
+        # Aseguramos que el cliente predeterminado siempre este disponible en el
+        # cache local del POS, aunque no forme parte del conjunto limitado de
+        # clientes frecuentes que carga el core por defecto.
+        default_partner = self.config_id.sg_default_partner_id
+        if default_partner and default_partner.id not in [p["id"] for p in partners]:
+            extra = self.env["res.partner"].search_read(
+                [("id", "=", default_partner.id)], fields=params["search_params"]["fields"]
+            )
+            partners += extra
+        return partners

@@ -1,6 +1,6 @@
 {
     "name": "SG POS Seller Cashier Flow",
-    "version": "17.0.1.1.1",
+    "version": "17.0.1.2.0",
     "category": "Point of Sale",
     "summary": "Flujo POS vendedores y caja con pedidos pendientes",
     "author": "Solutions Group",
@@ -27,6 +27,7 @@
             "sg_pos_seller_cashier_flow/static/src/app/hide_payment_button/hide_payment_button.xml",
             "sg_pos_seller_cashier_flow/static/src/app/seller_close_session/seller_close_session.js",
             "sg_pos_seller_cashier_flow/static/src/app/product_search/product_search.js",
+            "sg_pos_seller_cashier_flow/static/src/app/pos_default_partner/pos_default_partner.js",
         ],
     },
     "installable": True,
