@@ -73,12 +73,18 @@ Mientras menor sea el número, mayor prioridad tendrá la ubicación.
 
 ## Búsqueda de Productos
 
-El buscador del POS permite localizar productos por:
+El buscador del POS localiza productos por:
 
 - Nombre
-- Referencia interna
+- Referencia interna (`default_code`)
 - Código de barras
-- Variantes
+
+La búsqueda se dispara automáticamente mientras se escribe (con un pequeño
+retraso/debounce), consultando al servidor con el mismo criterio que usa
+Inventario > Productos (`ilike` sobre nombre/referencia/código de barra), sin
+necesidad de presionar Enter. Esto asegura que productos aún no cargados en el
+caché local del POS (por ejemplo, por el límite de carga inicial de productos)
+también aparezcan al buscar por referencia parcial.
 
 ---
 
