@@ -4,7 +4,7 @@
        t-inherit="point_of_sale.ActionpadWidget"
        t-inherit-mode="extension">
         <xpath expr="//button[contains(@class, 'pay-order-button')]" position="attributes">
-            <attribute name="t-if">pos.config.sg_pos_flow_role !== 'seller'</attribute>
+            <attribute name="t-if">pos.config.sg_pos_flow_role !== 'seller' or props.actionType === 'refund'</attribute>
         </xpath>
     </t>
 </templates>
