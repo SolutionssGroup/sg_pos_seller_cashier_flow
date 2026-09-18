@@ -1,6 +1,6 @@
 {
     "name": "SG POS Seller Cashier Flow",
-    "version": "17.0.1.2.2",
+    "version": "17.0.1.2.3",
     "category": "Point of Sale",
     "summary": "Flujo POS vendedores y caja con pedidos pendientes",
     "author": "Solutions Group",

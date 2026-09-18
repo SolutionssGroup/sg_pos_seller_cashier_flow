@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import { _t } from "@web/core/l10n/translation";
-import { Component } from "@odoo/owl";
+import { Component, useState } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
 import { patch } from "@web/core/utils/patch";
 import { ProductScreen } from "@point_of_sale/app/screens/product_screen/product_screen";
@@ -58,41 +58,54 @@ export class SendToCashierButton extends Component {
         this.pos = usePos();
         this.orm = useService("orm");
         this.notification = useService("pos_notification");
+        this.state = useState({ isSending: false });
     }
 
     async onClick() {
-        const order = this.pos.get_order();
-        const orderlines = order.get_orderlines();
-        if (!orderlines.length) {
-            this.notification.add(_t("No puedes enviar a Caja un pedido sin líneas."), 3000);
+        // Sin esta bandera, varios clics seguidos antes de que termine el RPC
+        // disparan una llamada independiente cada uno (el pedido no se quita
+        // de pantalla hasta que la primera termina), creando un
+        // sg.pos.pending.order duplicado por cada clic de mas.
+        if (this.state.isSending) {
             return;
         }
+        this.state.isSending = true;
+        try {
+            const order = this.pos.get_order();
+            const orderlines = order.get_orderlines();
+            if (!orderlines.length) {
+                this.notification.add(_t("No puedes enviar a Caja un pedido sin líneas."), 3000);
+                return;
+            }
 
-        await this.orm.call("sg.pos.pending.order", "create_from_pos_order_data", [
-            {
-                pending_order_id: order.sg_pending_order_id || false,
-                customer_note_name: order.sg_customer_note_name || "",
-                partner_id: order.get_partner()?.id || false,
-                seller_pos_config_id: this.pos.config.id,
-                amount_total: order.get_total_with_tax(),
-                lines: orderlines.map((line) => {
-                    const product = line.get_product();
-                    return {
-                        product_id: product.id,
-                        qty: line.get_quantity(),
-                        price_unit: line.get_unit_price(),
-                        discount: line.get_discount(),
-                        product_uom_id: product.uom_id?.[0] || false,
-                        location_id: line.sg_suggested_location_id || false,
-                        subtotal: line.get_unit_price() * line.get_quantity() * (1 - line.get_discount() / 100),
-                    };
-                }),
-            },
-        ]);
+            await this.orm.call("sg.pos.pending.order", "create_from_pos_order_data", [
+                {
+                    pending_order_id: order.sg_pending_order_id || false,
+                    customer_note_name: order.sg_customer_note_name || "",
+                    partner_id: order.get_partner()?.id || false,
+                    seller_pos_config_id: this.pos.config.id,
+                    amount_total: order.get_total_with_tax(),
+                    lines: orderlines.map((line) => {
+                        const product = line.get_product();
+                        return {
+                            product_id: product.id,
+                            qty: line.get_quantity(),
+                            price_unit: line.get_unit_price(),
+                            discount: line.get_discount(),
+                            product_uom_id: product.uom_id?.[0] || false,
+                            location_id: line.sg_suggested_location_id || false,
+                            subtotal: line.get_unit_price() * line.get_quantity() * (1 - line.get_discount() / 100),
+                        };
+                    }),
+                },
+            ]);
 
-        this.pos.removeOrder(order, false);
-        this.pos.add_new_order();
-        this.notification.add(_t("Pedido enviado a Caja"), 3000);
+            this.pos.removeOrder(order, false);
+            this.pos.add_new_order();
+            this.notification.add(_t("Pedido enviado a Caja"), 3000);
+        } finally {
+            this.state.isSending = false;
+        }
     }
 }
 
